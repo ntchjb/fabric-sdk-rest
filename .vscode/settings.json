@@ -1,0 +1,10 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/ccp.json"
+      ],
+      "url": "./networkconfigdata-schema.json"
+    }
+  ],
+}
