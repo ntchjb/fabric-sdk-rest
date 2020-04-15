@@ -32,7 +32,10 @@
   },
   "dependencies": {
     "body-parser": "^1.19.0",
+    "elliptic": "^6.5.2",
     "express": "^4.17.1",
-    "fabric-common": "^2.0.0-beta.4"
+    "fabric-network": "^2.0.0-beta.4",
+    "jsrsasign": "^8.0.15",
+    "winston": "^3.2.1"
   }
 }
