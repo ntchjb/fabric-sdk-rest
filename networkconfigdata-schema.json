@@ -1,0 +1,160 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "ChannelConfig": {
+            "additionalProperties": {
+                "$ref": "#/definitions/FabricNodesInChannel"
+            },
+            "type": "object"
+        },
+        "FabricNodeConfig": {
+            "properties": {
+                "grpcOptions": {
+                    "$ref": "#/definitions/GRPCOptions"
+                },
+                "tlsCACerts": {
+                    "$ref": "#/definitions/PEMConfig"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "FabricNodesInChannel": {
+            "properties": {
+                "orderers": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "peers": {
+                    "additionalProperties": {
+                        "properties": {
+                            "chaincodeQuery": {
+                                "type": "boolean"
+                            },
+                            "discover": {
+                                "type": "boolean"
+                            },
+                            "endorsingPeer": {
+                                "type": "boolean"
+                            },
+                            "eventSource": {
+                                "type": "boolean"
+                            },
+                            "ledgerQuery": {
+                                "type": "boolean"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "GRPCOptions": {
+            "properties": {
+                "grpc.http2.max_pings_without_data": {
+                    "type": "number"
+                },
+                "grpc.http2.min_time_between_pings_ms": {
+                    "type": "number"
+                },
+                "grpc.keepalive_permit_without_calls": {
+                    "type": "number"
+                },
+                "grpc.keepalive_time_ms": {
+                    "type": "number"
+                },
+                "grpc.keepalive_timeout_ms": {
+                    "type": "number"
+                },
+                "grpc.max_receive_message_length": {
+                    "type": "number"
+                },
+                "grpc.max_send_message_length": {
+                    "type": "number"
+                },
+                "request-timeout": {
+                    "type": "number"
+                },
+                "requestTimeout": {
+                    "type": "number"
+                },
+                "ssl-target-name-override": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "OrdererConfig": {
+            "properties": {
+                "grpcOptions": {
+                    "$ref": "#/definitions/GRPCOptions"
+                },
+                "mspid": {
+                    "type": "string"
+                },
+                "tlsCACerts": {
+                    "$ref": "#/definitions/PEMConfig"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "OrganizationConfig": {
+            "additionalProperties": {
+                "properties": {
+                    "mspid": {
+                        "type": "string"
+                    },
+                    "peers": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "object"
+        },
+        "PEMConfig": {
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "pem": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "properties": {
+        "channels": {
+            "$ref": "#/definitions/ChannelConfig"
+        },
+        "orderers": {
+            "additionalProperties": {
+                "$ref": "#/definitions/OrdererConfig"
+            },
+            "type": "object"
+        },
+        "organizations": {
+            "$ref": "#/definitions/OrganizationConfig"
+        },
+        "peers": {
+            "additionalProperties": {
+                "$ref": "#/definitions/FabricNodeConfig"
+            },
+            "type": "object"
+        }
+    },
+    "type": "object"
+}
