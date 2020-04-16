@@ -5,15 +5,12 @@
  */
 
 import express from 'express'
-import { User, Client, Utils } from 'fabric-common'
-import { InvokeFunction, EndorsementRequest } from '../interfaces'
-import { getCommonProperties } from '../lib/request'
+import { User } from 'fabric-common'
+import { InvokeFunction, EndorsementRequest, ProposalBase64 } from '../interfaces'
+import { getCommonProperties, proposalResponseToBase64, getInvokeFunctionInfo } from '../lib/request'
 import CustomEndorsement from '../lib/fabric-impl/CustomEndorsement'
 import FabricClient from '../lib/fabric-impl/Client'
 import winston from 'winston'
-
-//@ts-ignore
-import fabprotos from 'fabric-protos';
 
 const logger = winston.createLogger({
   transports: [
@@ -33,12 +30,12 @@ router.post('/create', async (req, res) => {
   const common = getCommonProperties(req.body);
 
   // Get invocation function
-  const chaincodeFunc: InvokeFunction = req.body.invoke;
+  const chaincodeFunc: InvokeFunction = getInvokeFunctionInfo(req.body.invoke);
 
   // Create client, user, and channel
   const client = FabricClient.getInstance();
   // Set dummy mutual TLS to prevent from error building endorsement
-  // that it is unable to add cert hash to the header of the endorsement
+  // otherwise, it is unable to add cert hash to the header of the endorsement
   client.setTlsClientCertAndKey('', '')
   const user = User.createUser('', '', common.mspid, common.cert);
   const channel = client.getChannel(common.channel);
@@ -64,10 +61,9 @@ router.post('/send', async (req, res, next) => {
   const common = getCommonProperties(req.body)
 
   // Get proposal, signature, and target peers
-  const proposalBase64: string = req.body.proposal;
-  const proposal = Buffer.from(proposalBase64, 'base64');
-  const signatureBase64: string = req.body.signature;
-  const signature = Buffer.from(signatureBase64, 'base64');
+  const proposalBase64: ProposalBase64 = req.body.proposal;
+  const proposal = Buffer.from(proposalBase64.payload, 'base64');
+  const signature = Buffer.from(proposalBase64.signature, 'base64');
   const targetPeers: string[] = req.body.peers;
 
   // Create client, user, and channel
@@ -84,23 +80,7 @@ router.post('/send', async (req, res, next) => {
   endorsement.sign(signature);
   try {
     const proposalResponses = await endorsement.send(endorsementRequest);
-    const processedResponses = proposalResponses.responses.map((responseObj) => {
-      const endorsement = {
-        endoser: responseObj.endorsement.endorser.toString('base64'),
-        signature: responseObj.endorsement.signature.toString('base64')
-      };
-      const payload = responseObj.payload.toString('base64');
-      const response = {
-        status: responseObj.response.status,
-        message: responseObj.response.message,
-        payload: responseObj.response.payload.toString('base64')
-      };
-      return {
-        endorsement,
-        payload,
-        response
-      };
-    });
+    const processedResponses = proposalResponseToBase64(proposalResponses.responses);
     const processedErrors = proposalResponses.errors.map((error) => ({
       message: error.message,
       name: error.name

@@ -5,15 +5,84 @@
  */
 
 import express from 'express'
+import { getCommonProperties, proposalResponseToBuffer } from '../lib/request'
+import { User } from 'fabric-common';
+import { ProposalBase64, TransactionBase64, CommitRequest, BroadcastResponse, EndorsementResponseBase64 } from '../interfaces';
+import CustomEndorsement from '../lib/fabric-impl/CustomEndorsement';
+import FabricClient from '../lib/fabric-impl/Client';
+import CustomCommit from '../lib/fabric-impl/CustomCommit';
 
 const router = express.Router()
 
 router.post('/create', (req, res, next) => {
+  // Get user certificate, channel name, and chaincode name
+  const common = getCommonProperties(req.body)
 
+  // Get proposal and its peer responses
+  const proposalBase64: ProposalBase64 = req.body.proposal;
+  const proposal = Buffer.from(proposalBase64.payload, 'base64');
+  const proposalResponses: EndorsementResponseBase64[] = req.body.responses;
+  
+  const processedResponses = proposalResponseToBuffer(proposalResponses);
+  
+  // Create client, user, and channel
+  const client = FabricClient.getInstance()
+  const channel = client.getChannel(common.channel);
+  const user = User.createUser('', '', common.mspid, common.cert);
+
+  // Create an custom endorsement prepare the endorsement data for creating commit object
+  const endorsement = new CustomEndorsement(common.chaincode, channel);
+  const idx = client.newIdentityContext(user);
+  endorsement.setPayload(proposal);
+  endorsement.setResponses(processedResponses);
+
+  // Create new commit and build it to get unsigned transaction
+  const commit = endorsement.newCommit();
+  const commitBytes = commit.build(idx);
+
+  const commitBase64 = commitBytes.toString('base64');
+
+  // Return the result
+  const result = {
+    transaction: commitBase64,
+  };
+
+  return res.json(result);
 })
 
-router.post('/send', (req, res, next) => {
+router.post('/send', async (req, res, next) => {
+  // Get user certificate, channel name, and chaincode name
+  const common = getCommonProperties(req.body)
 
+  // Create client, user, and channel
+  const client = FabricClient.getInstance()
+  const channel = client.getChannel(common.channel);
+  
+  // Get transaction and its signature
+  const transactionBase64: TransactionBase64 = req.body.transaction;
+  const transaction = Buffer.from(transactionBase64.payload, 'base64');
+  const signature = Buffer.from(transactionBase64.signature, 'base64');
+  const targetOrderers: string[] = req.body.orderers;
+
+  const commit = new CustomCommit(common.chaincode, channel)
+  commit.setPayload(transaction);
+  commit.sign(signature);
+  const commitRequest: CommitRequest = {
+    targets: targetOrderers,
+    requestTimeout: 60000
+  }
+  const result: BroadcastResponse = await commit.send(commitRequest);
+  
+  if (result.status === 'SUCCESS') {
+    return res.json({
+      success: true,
+    });
+  } else {
+    return res.json({
+      success: false,
+      message: result.status
+    });
+  }
 })
 
 export default router
