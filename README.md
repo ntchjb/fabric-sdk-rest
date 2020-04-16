@@ -15,7 +15,11 @@ This project is currently based on Fabric Node.js SDK version 2.0 beta 4. Theref
 
 # The Design
 
-This is a RESTful server which is a stateless server that provides API to `create` and `send` proposals, transactions, events, etc. THe signature created from any data is performed on client side. That means the client can sign transaction offline. It follows transaction flows of Hyperledger Fabric.
+This is a RESTful server which is a stateless server that provides API to `create` and `send` proposals, transactions, events, etc. THe signature that is created from any data is performed on client side. That means the client can sign data offline using their private key. The API follows transaction flows of Hyperledger Fabric.
+
+# The implementations
+
+`fabric-common` is used to create, build, sign, and send all types of data (e.g. proposal, transaction, event service, etc.). Since the RESTful server is designed to be stateless. that means it doesn't store any client data on server-side. However, when we want to send binary data along with its signature, its API does not allow to set binary data directly into their class. For example, setting proposal bytes directly into Endorsement class. In order to create proposal in binary data for signature creation, we need to rebuild the endorsement again via `endorsement.build()` which change the endorsement data and make the existing signature invalid. (e.g. transaction ID is changed every time when re-building endorsement). Our solution is to extend the class and add the method that receive the binary data and override the data to class's field. I personally think that this is just a dirty fix, and it would be great that these class will allow to set binary data directly into the class in the future version.
 
 # License
 
