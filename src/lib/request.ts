@@ -7,15 +7,18 @@
 import { CommonProperty } from '../interfaces'
 import * as config from '../../config.json'
 
-const getCommonProperties = (reqBody: any): CommonProperty => {
-  const certificatePEM: string = Buffer
+export const getCommonProperties = (reqBody: any): CommonProperty => {
+  let certificatePEM: string = '';
+  if (reqBody.cert) {
+    certificatePEM = Buffer
     .from(reqBody.cert, 'base64')
     .toString('utf8');
+  }
   return {
     cert: certificatePEM,
-    mspid: config.mspid,
-    chaincode: config.chaincode,
-    channel: config.channel
+    mspid: reqBody.mspid,
+    chaincode: reqBody.chaincode,
+    channel: reqBody.channel
   };
 }
 
