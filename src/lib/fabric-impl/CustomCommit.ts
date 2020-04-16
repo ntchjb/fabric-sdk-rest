@@ -1,3 +1,9 @@
+/**
+ * A custom version of Commit instance which allows to
+ * set transaction payload data directly to the class
+ * 
+ * Copyright 2020 JAIBOON Nathachai
+ */
 import { Commit, Channel, Endorsement } from 'fabric-common';
 
 class CustomCommit extends Commit {

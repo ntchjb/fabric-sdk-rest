@@ -2,7 +2,7 @@
  * CustomEndorsement is the extension of Endorsement object
  * that provide function to manually set payload to it
  * so that the server doesn't need to remember the endorsement object
- * because client will send payload to it
+ * after built the proposal.
  * 
  * Copyright 2020 JAIBOON Nathachai
  */

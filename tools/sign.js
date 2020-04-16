@@ -9,7 +9,8 @@
  * The utility to sign a content imported from content.txt and output as the signature
  * in base64 format
  * 
- * Modified by JAIBOON Nathachai
+ * Created by JAIBOON Nathachai
+ * Code derived from https://github.com/hyperledger/fabric-sdk-node
  */
 const elliptic = require('elliptic');
 const { KEYUTIL } = require('jsrsasign');
