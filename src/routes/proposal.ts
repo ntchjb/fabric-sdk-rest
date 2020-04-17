@@ -5,8 +5,8 @@
  */
 
 import express from 'express'
-import { User } from 'fabric-common'
-import { InvokeFunction, EndorsementRequest, ProposalBase64 } from '../interfaces'
+import { User, BuildProposalRequest, SendProposalRequest } from 'fabric-common'
+import { ProposalBase64 } from '../lib/interfaces'
 import { getCommonProperties, proposalResponseToBase64, getInvokeFunctionInfo } from '../lib/request'
 import CustomEndorsement from '../lib/fabric-impl/CustomEndorsement'
 import FabricClient from '../lib/fabric-impl/Client'
@@ -30,13 +30,10 @@ router.post('/create', async (req, res) => {
   const common = getCommonProperties(req.body);
 
   // Get invocation function
-  const chaincodeFunc: InvokeFunction = getInvokeFunctionInfo(req.body.invoke);
+  const chaincodeFunc: BuildProposalRequest = getInvokeFunctionInfo(req.body.invoke);
 
   // Create client, user, and channel
   const client = FabricClient.getInstance();
-  // Set dummy mutual TLS to prevent from error building endorsement
-  // otherwise, it is unable to add cert hash to the header of the endorsement
-  client.setTlsClientCertAndKey('', '')
   const user = User.createUser('', '', common.mspid, common.cert);
   const channel = client.getChannel(common.channel);
 
@@ -71,7 +68,7 @@ router.post('/send', async (req, res, next) => {
   const channel = client.getChannel(common.channel);
 
   // Get endorsement config
-  const endorsementRequest: EndorsementRequest = {
+  const endorsementRequest: SendProposalRequest = {
     targets: targetPeers
   }
 

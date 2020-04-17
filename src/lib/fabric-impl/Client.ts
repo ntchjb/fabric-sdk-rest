@@ -13,6 +13,9 @@ class FabricClient {
   public static getInstance(): Client {
     if (!FabricClient.client) {
       FabricClient.client = new Client('fabricclient');
+      // Set dummy mutual TLS to prevent from error building endorsement
+      // otherwise, it is unable to add cert hash to the header of the endorsement
+      FabricClient.client.setTlsClientCertAndKey('', '');
     }
 
     return FabricClient.client;

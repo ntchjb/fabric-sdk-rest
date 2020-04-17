@@ -4,9 +4,9 @@
  * Copyright 2020 JAIBOON Nathachai
  */
 
-import { CommonProperty, InvokeFunction, InvokeFunctionBase64 } from '../interfaces'
-import { EndorsementResponse } from 'fabric-common';
-import { EndorsementResponseBase64 } from '../interfaces';
+import { CommonProperty, InvokeFunctionBase64 } from './interfaces'
+import { EndorsementResponse, BuildProposalRequest } from 'fabric-common';
+import { EndorsementResponseBase64 } from './interfaces';
 
 export const getCommonProperties = (reqBody: any): CommonProperty => {
   let certificatePEM: string = '';
@@ -72,9 +72,9 @@ export const proposalResponseToBuffer = (responses: EndorsementResponseBase64[])
   return processedResponses;
 }
 
-export const getInvokeFunctionInfo = (info: InvokeFunctionBase64): InvokeFunction => {
+export const getInvokeFunctionInfo = (info: InvokeFunctionBase64): BuildProposalRequest => {
 
-  const result: InvokeFunction = {
+  const result: BuildProposalRequest = {
     fcn: info.fcn,
     args: info.args
   };

@@ -6,11 +6,12 @@
 
 import express from 'express'
 import { getCommonProperties, proposalResponseToBuffer } from '../lib/request'
-import { User } from 'fabric-common';
-import { ProposalBase64, TransactionBase64, CommitRequest, BroadcastResponse, EndorsementResponseBase64 } from '../interfaces';
+import { User, CommitSendRequest, BroadcastResponse } from 'fabric-common';
+import { ProposalBase64, TransactionBase64, EndorsementResponseBase64 } from '../lib/interfaces';
 import CustomEndorsement from '../lib/fabric-impl/CustomEndorsement';
 import FabricClient from '../lib/fabric-impl/Client';
 import CustomCommit from '../lib/fabric-impl/CustomCommit';
+import { REQUEST_TIMEOUT } from '../lib/constants'
 
 const router = express.Router()
 
@@ -67,9 +68,9 @@ router.post('/send', async (req, res, next) => {
   const commit = new CustomCommit(common.chaincode, channel)
   commit.setPayload(transaction);
   commit.sign(signature);
-  const commitRequest: CommitRequest = {
+  const commitRequest: CommitSendRequest = {
     targets: targetOrderers,
-    requestTimeout: 60000
+    requestTimeout: REQUEST_TIMEOUT
   }
   const result: BroadcastResponse = await commit.send(commitRequest);
   

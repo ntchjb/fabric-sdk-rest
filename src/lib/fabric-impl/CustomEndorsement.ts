@@ -6,8 +6,7 @@
  * 
  * Copyright 2020 JAIBOON Nathachai
  */
-import { Endorsement, Channel, EndorsementResponse } from 'fabric-common';
-import { EndorsementActions } from '../../interfaces'
+import { Endorsement, Channel, EndorsementResponse, EndorsementAction } from 'fabric-common';
 import fabprotos from '../protobuf/fabprotos.js';
 
 const TYPE = 'Endorsement';
@@ -34,7 +33,7 @@ class CustomEndorsement extends Endorsement {
   protected type: string
   protected _payload: Buffer | null
   protected _proposalResponses: EndorsementResponse[] | null
-  protected _action: EndorsementActions | null
+  protected _action: EndorsementAction | null
 
   constructor(chaincodeId: string, channel: Channel) {
 		super(chaincodeId, channel);
