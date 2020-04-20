@@ -21,51 +21,51 @@ const logger = winston.createLogger({
       )
     })
   ]
-});
+})
 
-const router = express.Router();
+const router = express.Router()
 
 router.post('/create', async (req, res) => {
   // Get user certificate, channel name, and chaincode name
-  const common = getCommonProperties(req.body);
+  const common = getCommonProperties(req.body)
 
   // Get invocation function
-  const chaincodeFunc: BuildProposalRequest = getInvokeFunctionInfo(req.body.invoke);
+  const chaincodeFunc: BuildProposalRequest = getInvokeFunctionInfo(req.body.invoke)
 
   // Create client, user, and channel
-  const client = FabricClient.getInstance();
-  const user = User.createUser('', '', common.mspid, common.cert);
-  const channel = client.getChannel(common.channel);
+  const client = FabricClient.getInstance()
+  const user = User.createUser('', '', common.mspid, common.cert)
+  const channel = client.getChannel(common.channel)
 
   // Create endorsement and convert to base64 string
-  const idx = client.newIdentityContext(user);
-  const endorsement = channel.newEndorsement(common.chaincode);
-  const proposalBytes = endorsement.build(idx, chaincodeFunc);
-  const transactionId = endorsement.getTransactionId();
-  const proposalBase64 = proposalBytes.toString('base64');
+  const idx = client.newIdentityContext(user)
+  const endorsement = channel.newEndorsement(common.chaincode)
+  const proposalBytes = endorsement.build(idx, chaincodeFunc)
+  const transactionId = endorsement.getTransactionId()
+  const proposalBase64 = proposalBytes.toString('base64')
 
   // Return the result
   const result = {
     proposal: proposalBase64,
-    transactionId,
-  };
+    transactionId
+  }
 
-  return res.json(result);
+  return res.json(result)
 })
 
-router.post('/send', async (req, res, next) => {
+router.post('/send', async (req, res) => {
   // Get user certificate, channel name, and chaincode name
   const common = getCommonProperties(req.body)
 
   // Get proposal, signature, and target peers
-  const proposalBase64: ProposalBase64 = req.body.proposal;
-  const proposal = Buffer.from(proposalBase64.payload, 'base64');
-  const signature = Buffer.from(proposalBase64.signature, 'base64');
-  const targetPeers: string[] = req.body.peers;
+  const proposalBase64: ProposalBase64 = req.body.proposal
+  const proposal = Buffer.from(proposalBase64.payload, 'base64')
+  const signature = Buffer.from(proposalBase64.signature, 'base64')
+  const targetPeers: string[] = req.body.peers
 
   // Create client, user, and channel
   const client = FabricClient.getInstance()
-  const channel = client.getChannel(common.channel);
+  const channel = client.getChannel(common.channel)
 
   // Get endorsement config
   const endorsementRequest: SendProposalRequest = {
@@ -74,26 +74,26 @@ router.post('/send', async (req, res, next) => {
 
   const endorsement = new CustomEndorsement(common.chaincode, channel)
   endorsement.setPayload(proposal)
-  endorsement.sign(signature);
+  endorsement.sign(signature)
   try {
-    const proposalResponses = await endorsement.send(endorsementRequest);
-    const processedResponses = proposalResponseToBase64(proposalResponses.responses);
+    const proposalResponses = await endorsement.send(endorsementRequest)
+    const processedResponses = proposalResponseToBase64(proposalResponses.responses)
     const processedErrors = proposalResponses.errors.map((error) => ({
       message: error.message,
       name: error.name
-    }));
+    }))
     
     // Return the result
     const result = {
       responses: processedResponses,
       errors: processedErrors
-    };
-    return res.json(result);
+    }
+    return res.json(result)
   } catch(err) {
     logger.error('Unable to send signed proposal:', err)
     return res.json({
       message: 'Unable to send signed proposal'
-    });
+    })
   }
 })
 

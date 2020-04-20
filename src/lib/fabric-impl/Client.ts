@@ -3,22 +3,20 @@
  * 
  * Copyright 2020 JAIBOON Nathachai
  */
-import { Client } from 'fabric-common';
+import { Client } from 'fabric-common'
 
 class FabricClient {
   private static client: Client
 
-  private constructor() {}
-
   public static getInstance(): Client {
     if (!FabricClient.client) {
-      FabricClient.client = new Client('fabricclient');
+      FabricClient.client = new Client('fabricclient')
       // Set dummy mutual TLS to prevent from error building endorsement
       // otherwise, it is unable to add cert hash to the header of the endorsement
-      FabricClient.client.setTlsClientCertAndKey('', '');
+      FabricClient.client.setTlsClientCertAndKey('', '')
     }
 
-    return FabricClient.client;
+    return FabricClient.client
   }
 }
 

@@ -3,45 +3,46 @@
  * 
  * Copyright 2020 JAIBOON Nathachai
  */
+/* eslint-disable @typescript-eslint/no-namespace */
 
 import { ServiceHandler, Eventer } from 'fabric-common'
-import { protos, common } from './protobuf/fabprotos';
+import { protos, common } from './protobuf/fabprotos'
 
 export interface CommonProperty {
-  cert: string,
-  mspid: string,
-  channel: string,
-  chaincode: string
+  cert: string;
+  mspid: string;
+  channel: string;
+  chaincode: string;
 }
 
 /** Chaincode's invocation function */
 export interface InvokeFunctionBase64 {
   /** Name of chaincode invocation function */
-  fcn: string,
+  fcn: string;
   /** A list of arguments for the function */
-  args: Array<string>,
+  args: Array<string>;
   /** Transient field object. Its value is binary data encoded in base64 format */
   transientMap?: {
-    [key: string]: string
-  },
+    [key: string]: string;
+  };
   /** Indicator whether the function will be inited instead of invoke or not */
-  init?: boolean
+  init?: boolean;
 }
 
 /** Base64 version of Proposal */
 export interface ProposalBase64 {
   /** Proposal's payload which is binary data encoded in base64 format */
-  payload: string,
+  payload: string;
   /** Proposal's signature which is binary data encoded in base64 format */
-  signature: string
+  signature: string;
 }
 
 /** Base64 version of transaction */
 export interface TransactionBase64 {
   /** Transaction's payload which is binary data encoded in base64 format */
-  payload: string,
+  payload: string;
   /** Transaction's signature which is binary data encoded in base64 format */
-  signature: string,
+  signature: string;
 }
 
 /** Base64 version of EndorsementResponse */
@@ -65,7 +66,7 @@ export interface EndorsementResponseBase64 {
     /** Identity of the endorser in base64 format */
     endorser: string;
     /** Signature of the payload included in ProposalResponse concatenated with
-     * the endorser's certificate; ie, sign(ProposalResponse.payload + endorser)
+     * the endorser's certificate ie, sign(ProposalResponse.payload + endorser)
      * This is encoded in base64 format */
 		signature: string;
 	};
@@ -84,19 +85,19 @@ export interface EventServiceBase64 {
 // Declare getter and setter for protobuf protos.Proposal message
 // Because protobuf version 6 is no longer use getter and setter
 // But fabric-common still use protobuf v5.
-declare module './protobuf/fabprotos.js' {
+declare module './protobuf/fabprotos' {
   namespace protos {
     interface Proposal {
-      getHeader(): Uint8Array,
-      getPayload(): Uint8Array,
-      getExtension(): Uint8Array
+      getHeader(): Uint8Array;
+      getPayload(): Uint8Array;
+      getExtension(): Uint8Array;
     }
   }
 
   namespace common {
     interface Header {
-      getSignatureHeader(): Uint8Array,
-      getChannelHeader(): Uint8Array
+      getSignatureHeader(): Uint8Array;
+      getChannelHeader(): Uint8Array;
     }
   }
 }
@@ -114,9 +115,9 @@ declare module 'fabric-common' {
   /** Broadcast response received after sent a transaction to orderer */
   interface BroadcastResponse {
     /** Status of the transaction. Can be SUCCESS or else */
-    status: 'SUCCESS' | string,
+    status: 'SUCCESS' | string;
     /** Additional information about the status */
-    info: string
+    info: string;
   }
 
   interface CommitSendRequest {
@@ -146,7 +147,7 @@ declare module 'fabric-common' {
     args: Array<string>;
     /** Transient field */
     transientMap?: {
-      [key: string]: Uint8Array
+      [key: string]: Uint8Array;
     };
     /** Indicator whether the function will be inited instead of invoke or not */
     init?: boolean;

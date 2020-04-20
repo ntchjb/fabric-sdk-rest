@@ -10,8 +10,9 @@ import bodyParser from 'body-parser'
 import proposalRoute from './routes/proposal'
 import transactionRoute from './routes/transaction'
 import eventRoute from './routes/event'
+import blockchainNetwork from './routes/network'
 import FabricClient from './lib/fabric-impl/Client'
-import * as ccp from '../ccp.json';
+import * as ccp from '../ccp.json'
 import { NetworkConfig, NetworkConfigData } from './lib/fabric-impl/NetworkConfig'
 
 // Get an instance of express
@@ -25,10 +26,11 @@ app.use(bodyParser.json())
 app.use('/proposal', proposalRoute)
 app.use('/transaction', transactionRoute)
 app.use('/event', eventRoute)
+app.use('/network', blockchainNetwork)
 
-const init = async () => {
+const init = async (): Promise<void> => {
   console.log('Load common connection profile from ccp.yaml ...')
-  const client = FabricClient.getInstance();
+  const client = FabricClient.getInstance()
   try {
     await NetworkConfig.loadFromConfig(client, ccp as NetworkConfigData)
 
@@ -37,6 +39,6 @@ const init = async () => {
   } catch (err) {
     console.error('Error occurred during load common connection profile:', err)
   }
-};
+}
 
-init();
+init()
