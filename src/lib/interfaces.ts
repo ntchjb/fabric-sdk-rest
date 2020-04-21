@@ -5,7 +5,6 @@
  */
 /* eslint-disable @typescript-eslint/no-namespace */
 
-import { ServiceHandler, Eventer } from 'fabric-common'
 import { protos, common } from './protobuf/fabprotos'
 
 export interface CommonProperty {
