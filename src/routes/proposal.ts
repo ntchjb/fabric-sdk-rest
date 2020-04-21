@@ -11,6 +11,7 @@ import { getCommonProperties, proposalResponseToBase64, getInvokeFunctionInfo } 
 import CustomEndorsement from '../lib/fabric-impl/CustomEndorsement'
 import FabricClient from '../lib/fabric-impl/Client'
 import winston from 'winston'
+import { ECDSASignature } from '../lib/ECDSASignature'
 
 const logger = winston.createLogger({
   transports: [
@@ -60,7 +61,10 @@ router.post('/send', async (req, res) => {
   // Get proposal, signature, and target peers
   const proposalBase64: ProposalBase64 = req.body.proposal
   const proposal = Buffer.from(proposalBase64.payload, 'base64')
-  const signature = Buffer.from(proposalBase64.signature, 'base64')
+  const sigObj = new ECDSASignature()
+  sigObj.fromDER(Buffer.from(proposalBase64.signature, 'base64'))
+  sigObj.lowerS()
+  const signature = sigObj.toDER()
   const targetPeers: string[] = req.body.peers
 
   // Create client, user, and channel

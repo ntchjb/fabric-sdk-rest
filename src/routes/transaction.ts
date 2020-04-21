@@ -12,6 +12,7 @@ import CustomEndorsement from '../lib/fabric-impl/CustomEndorsement'
 import FabricClient from '../lib/fabric-impl/Client'
 import CustomCommit from '../lib/fabric-impl/CustomCommit'
 import { REQUEST_TIMEOUT } from '../lib/constants'
+import { ECDSASignature } from '../lib/ECDSASignature'
 
 const router = express.Router()
 
@@ -62,7 +63,10 @@ router.post('/send', async (req, res) => {
   // Get transaction and its signature
   const transactionBase64: TransactionBase64 = req.body.transaction
   const transaction = Buffer.from(transactionBase64.payload, 'base64')
-  const signature = Buffer.from(transactionBase64.signature, 'base64')
+  const sigObj = new ECDSASignature()
+  sigObj.fromDER(Buffer.from(transactionBase64.signature, 'base64'))
+  sigObj.lowerS()
+  const signature = sigObj.toDER()
   const targetOrderers: string[] = req.body.orderers
 
   const commit = new CustomCommit(common.chaincode, channel)

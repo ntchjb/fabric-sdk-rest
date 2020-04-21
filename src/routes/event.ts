@@ -11,6 +11,7 @@ import FabricClient from '../lib/fabric-impl/Client'
 import { EventListenerRequest, EventServiceBase64 } from '../lib/interfaces'
 import CustomEventService from '../lib/fabric-impl/CustomEventService'
 import { REQUEST_TIMEOUT } from '../lib/constants'
+import { ECDSASignature } from '../lib/ECDSASignature'
 
 const router = express.Router()
 
@@ -43,9 +44,13 @@ router.post('/send', async (req, res) => {
 
   // Get event service payload and signature
   const eventServiceBase64: EventServiceBase64 = req.body.event
+  const sigObj = new ECDSASignature()
+  sigObj.fromDER(Buffer.from(eventServiceBase64.signature, 'base64'))
+  sigObj.lowerS()
+  const signature = sigObj.toDER()
   const eventServiceBytes = {
     payload: Buffer.from(eventServiceBase64.payload, 'base64'),
-    signature: Buffer.from(eventServiceBase64.signature, 'base64')
+    signature
   }
   // Get target peers
   const peers: string[] = req.body.peers
