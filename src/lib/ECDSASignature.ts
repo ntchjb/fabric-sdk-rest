@@ -78,6 +78,7 @@ export class ECDSASignature {
     const r = this.getBufferFromBigInt(this.value.r)
     const s = this.getBufferFromBigInt(this.value.s)
 
+    // Define identifier and content length
     let rInteger = Buffer.alloc(2)
     let sInteger = Buffer.alloc(2)
     rInteger.writeUInt8(ASN1Type.INTEGER)
@@ -85,9 +86,11 @@ export class ECDSASignature {
     rInteger.writeUInt8(r.length, 1)
     sInteger.writeUInt8(s.length, 1)
 
+    // concatenate identifier, content length, and content together
     rInteger = Buffer.concat([rInteger, r])
     sInteger = Buffer.concat([sInteger, s])
 
+    // Now, create SEQUENCE object from R and S integer
     let result = Buffer.alloc(2)
     const sequenceLength = rInteger.length + sInteger.length
     result.writeUInt8(ASN1Type.SEQUENCE)

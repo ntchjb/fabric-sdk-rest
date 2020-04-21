@@ -4,7 +4,7 @@
  * Copyright 2020 JAIBOON Nathachai
  */
 
-import express from 'express'
+import express, { Request, Response } from 'express'
 import { getCommonProperties, proposalResponseToBuffer } from '../lib/request'
 import { User, CommitSendRequest, BroadcastResponse } from 'fabric-common'
 import { ProposalBase64, TransactionBase64, EndorsementResponseBase64 } from '../lib/interfaces'
@@ -13,10 +13,24 @@ import FabricClient from '../lib/fabric-impl/Client'
 import CustomCommit from '../lib/fabric-impl/CustomCommit'
 import { REQUEST_TIMEOUT } from '../lib/constants'
 import { ECDSASignature } from '../lib/ECDSASignature'
+import { validationResult, body } from 'express-validator'
 
 const router = express.Router()
 
-router.post('/create', (req, res) => {
+router.post('/create', [
+  body('cert').isBase64(),
+  body('channel').isString(),
+  body('chaincode').isString(),
+  body('mspid').isString(),
+  body('proposal.payload').isBase64(),
+  body('responses').exists()
+], (req: Request, res: Response) => {
+  // Validate request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
   // Get user certificate, channel name, and chaincode name
   const common = getCommonProperties(req.body)
 
@@ -27,6 +41,7 @@ router.post('/create', (req, res) => {
   
   const processedResponses = proposalResponseToBuffer(proposalResponses)
   
+  try {
   // Create client, user, and channel
   const client = FabricClient.getInstance()
   const channel = client.getChannel(common.channel)
@@ -50,9 +65,27 @@ router.post('/create', (req, res) => {
   }
 
   return res.json(result)
+} catch(err) {
+  return res.status(500).json({
+    message: `Unable to generate transaction: ${err.message}`
+  })
+}
 })
 
-router.post('/send', async (req, res) => {
+router.post('/send', [
+  body('channel').isString(),
+  body('chaincode').isString(),
+  body('transaction.payload').isBase64(),
+  body('transaction.signature').isBase64(),
+  body('orderers').isArray(),
+  body('orderers.*').isString(),
+], async (req: Request, res: Response) => {
+  // Validate request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
   // Get user certificate, channel name, and chaincode name
   const common = getCommonProperties(req.body)
 
@@ -64,8 +97,14 @@ router.post('/send', async (req, res) => {
   const transactionBase64: TransactionBase64 = req.body.transaction
   const transaction = Buffer.from(transactionBase64.payload, 'base64')
   const sigObj = new ECDSASignature()
+  try {
   sigObj.fromDER(Buffer.from(transactionBase64.signature, 'base64'))
   sigObj.lowerS()
+  } catch(err) {
+    return res.status(500).json({
+      message: `Unable to check signature: ${err.message}`
+    })
+  }
   const signature = sigObj.toDER()
   const targetOrderers: string[] = req.body.orderers
 
@@ -76,16 +115,22 @@ router.post('/send', async (req, res) => {
     targets: targetOrderers,
     requestTimeout: REQUEST_TIMEOUT
   }
-  const result: BroadcastResponse = await commit.send(commitRequest)
-  
-  if (result.status === 'SUCCESS') {
-    return res.json({
-      success: true
-    })
-  } else {
-    return res.json({
-      success: false,
-      message: result.status
+  try {
+    const result: BroadcastResponse = await commit.send(commitRequest)
+    
+    if (result.status === 'SUCCESS') {
+      return res.json({
+        success: true
+      })
+    } else {
+      return res.json({
+        success: false,
+        message: result.status
+      })
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: `Unable to send signed transaction: ${err.message}`
     })
   }
 })
