@@ -117,34 +117,38 @@ export const twoComplementConverter = (numBytes: Buffer): void => {
   }
 }
 
+export const getBigIntegerFromBuffer = (data: Buffer): bigint => {
+  if(data.length > 0) {
+    /* 
+      Since INTEGER is two complement number, the most significant bit is a sign bit
+      indicating whether the number is negative (1) or positive (0)
+    */
+
+    // Clone buffer because we need to modify it and don't want to mutate the original
+    const numBytes = Buffer.from(data)
+    // Get sign
+    const sign = numBytes[0] >> 7
+    let result = 0n
+    if (sign === 1) {
+      twoComplementConverter(numBytes)
+      // Convert to BigInt
+      result = BigInt(`0x${numBytes.toString('hex')}`)
+    } else {
+      result = BigInt(`0x${numBytes.toString('hex')}`)
+    }
+    return result
+  } else {
+    return 0n
+  }
+};
+
 const parseBigInteger = (data: Buffer): bigint => {
   const contentParts = getASN1Parts(data)
   if (contentParts) {
     if (checkASN1Identifier(contentParts.identifier, ASN1Type.INTEGER) === false) {
       throw new Error('unexpected type of the data. expected integer')
     }
-    if(contentParts.content.length > 0) {
-      /* 
-        Since INTEGER is two complement number, the most significant bit is a sign bit
-        indicating whether the number is negative (1) or positive (0)
-      */
-
-      // Clone buffer because we need to modify it and don't want to mutate the original
-      const numBytes = Buffer.from(contentParts.content)
-      // Get sign
-      const sign = numBytes[0] >> 7
-      let result = 0n
-      if (sign === 1) {
-        twoComplementConverter(numBytes)
-        // Convert to BigInt
-        result = BigInt(`0x${numBytes.toString('hex')}`)
-      } else {
-        result = BigInt(`0x${numBytes.toString('hex')}`)
-      }
-      return result
-    } else {
-      return 0n
-    }
+    return getBigIntegerFromBuffer(contentParts.content)
   } else {
     throw new Error('unable to get ASN.1 parts from the given data')
   }

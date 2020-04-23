@@ -33,7 +33,7 @@ export interface ProposalBase64 {
   /** Proposal's payload which is binary data encoded in base64 format */
   payload: string;
   /** Proposal's signature which is binary data encoded in base64 format */
-  signature: string;
+  signature: Signature;
 }
 
 /** Base64 version of transaction */
@@ -41,7 +41,7 @@ export interface TransactionBase64 {
   /** Transaction's payload which is binary data encoded in base64 format */
   payload: string;
   /** Transaction's signature which is binary data encoded in base64 format */
-  signature: string;
+  signature: Signature;
 }
 
 /** Base64 version of EndorsementResponse */
@@ -76,9 +76,16 @@ export interface EventListenerRequest {
   id: string;
 }
 
+export interface Signature {
+  /** Type can be ASN.1 DER format (der) or concatenated r and s values (raw) */
+  type: 'der' | 'raw';
+  /** Signature value in base64 format */
+  value: string;
+}
+
 export interface EventServiceBase64 {
   payload: string;
-  signature: string;
+  signature: Signature;
 }
 
 // Declare getter and setter for protobuf protos.Proposal message

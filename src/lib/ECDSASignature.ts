@@ -7,7 +7,8 @@
  * DER is one of the encoding that commonly used in cryptography e.g. X.509 certificate, signature
  */
 
-import { RootDefinition, ASN1Type, ASN1, twoComplementConverter } from "./asn1"
+import { RootDefinition, ASN1Type, ASN1, twoComplementConverter, getBigIntegerFromBuffer } from "./asn1"
+import { Signature } from "./interfaces"
 
 interface ECDSAValue {
   r: bigint;
@@ -46,6 +47,35 @@ export class ECDSASignature {
 
   public fromObject(signature: ECDSAValue): void {
     this.value = signature
+  }
+
+  public fromConcat(signature: Buffer): void {
+    const middle = signature.length / 2;
+    let rBytes = signature.slice(0, middle)
+    let sBytes = signature.slice(middle, signature.length)
+    const oneByte = Buffer.from([0])
+    // r and s value are always positive integer, therefore
+    // we need to make sure that the most significant byte is zero
+    // If it is not zero, then just prepend a zero empty byte
+    if (rBytes[0] >> 7 === 1) {
+      rBytes = Buffer.concat([oneByte, rBytes])
+    }
+    if (sBytes[0] >> 7 === 1) {
+      sBytes = Buffer.concat([oneByte, sBytes])
+    }
+    // Then, convert to bigint
+    const r = getBigIntegerFromBuffer(rBytes)
+    const s = getBigIntegerFromBuffer(sBytes)
+    this.value = {
+      r,
+      s
+    };
+  }
+
+  public toConcat(): Buffer {
+    const r = this.getBufferFromBigInt(this.value.r)
+    const s = this.getBufferFromBigInt(this.value.s)
+    return Buffer.concat([r, s])
   }
 
   private getBufferFromBigInt(data: bigint): Buffer {
@@ -119,16 +149,35 @@ export class ECDSASignature {
     */
     if (this.value.s < this.P256N) {
       // Shift bits in s value to the right 1 time
-      if (this.value.s > (this.P256N >> BigInt(1))) {
+      if (this.value.s > (this.P256N >> 1n)) {
         this.value.s = this.P256N - this.value.s
       }
     } else if (this.value.s < this.P384N) {
-      if (this.value.s > (this.P384N >> BigInt(1))) {
+      if (this.value.s > (this.P384N >> 1n)) {
         this.value.s = this.P384N - this.value.s
       }
     } else if (this.value.s < this.P521N) {
-      if (this.value.s > (this.P521N >> BigInt(1))) {
+      if (this.value.s > (this.P521N >> 1n)) {
         this.value.s = this.P521N - this.value.s
+      }
+    }
+  }
+
+  public import(signature: Signature): void {
+    const {value: signatureBase64, type: signatureType} = signature
+    if (signatureType === 'der') {
+      try {
+        this.fromDER(Buffer.from(signatureBase64, 'base64'))
+        this.lowerS()
+      } catch(err) {
+        throw new Error(`Unable to use DER encoded signature: ${err.message}`)
+      }
+    } else if (signatureType === 'raw') {
+      try {
+        this.fromConcat(Buffer.from(signatureBase64, 'base64'))
+        this.lowerS()
+      } catch(err) {
+        throw new Error(`Unable to use concatenated signature: ${err.message}`)
       }
     }
   }

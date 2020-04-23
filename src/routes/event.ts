@@ -60,7 +60,8 @@ router.post('/send', [
   body('channel').isString(),
   body('chaincode').isString(),
   body('event.payload').isBase64(),
-  body('event.signature').isBase64(),
+  body('event.signature.type').isString(),
+  body('event.signature.value').isBase64(),
   body('listener.type').isString(),
   body('listener.id').isString(),
   body('peers').isArray().notEmpty(),
@@ -79,11 +80,10 @@ router.post('/send', [
   const eventServiceBase64: EventServiceBase64 = req.body.event
   const sigObj = new ECDSASignature()
   try {
-    sigObj.fromDER(Buffer.from(eventServiceBase64.signature, 'base64'))
-    sigObj.lowerS()
+    sigObj.import(eventServiceBase64.signature)
   } catch(err) {
-    return res.status(500).json({
-      message: `Unable to check signature: ${err.message}`
+    return res.status(422).json({
+      message: err.message
     })
   }
   const signature = sigObj.toDER()
