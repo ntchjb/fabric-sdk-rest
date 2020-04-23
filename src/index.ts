@@ -6,6 +6,7 @@
 
 import express from 'express'
 import bodyParser from 'body-parser'
+import cors from 'cors'
 
 import proposalRoute from './routes/proposal'
 import transactionRoute from './routes/transaction'
@@ -17,6 +18,7 @@ import { NetworkConfig, NetworkConfigData } from './lib/fabric-impl/NetworkConfi
 
 // Get an instance of express
 const app = express()
+app.use(cors())
 const port = process.env.PORT || 3000
 
 // Add JSON body parser middleware to express app
