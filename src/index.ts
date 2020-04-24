@@ -15,10 +15,12 @@ import blockchainNetwork from './routes/network'
 import FabricClient from './lib/fabric-impl/Client'
 import * as ccp from '../ccp.json'
 import { NetworkConfig, NetworkConfigData } from './lib/fabric-impl/NetworkConfig'
+import compression from 'compression'
 
 // Get an instance of express
 const app = express()
 app.use(cors())
+app.use(compression())
 const port = process.env.PORT || 3000
 
 // Add JSON body parser middleware to express app
