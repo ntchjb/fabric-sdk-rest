@@ -22,7 +22,9 @@ app.use(cors())
 const port = process.env.PORT || 3000
 
 // Add JSON body parser middleware to express app
-app.use(bodyParser.json())
+app.use(bodyParser.json({
+  limit: '100mb'
+}))
 
 // Assign routers to express app
 app.use('/proposal', proposalRoute)
