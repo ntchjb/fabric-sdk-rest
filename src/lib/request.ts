@@ -25,10 +25,16 @@ export const getCommonProperties = (reqBody: CommonProperty): CommonProperty => 
 
 export const proposalResponseToBase64 = (responses: EndorsementResponse[]): EndorsementResponseBase64[] => {
   const processedResponses = responses.map((responseObj) => {
-    const endorsement = {
-      endorser: responseObj.endorsement.endorser.toString('base64'),
-      signature: responseObj.endorsement.signature.toString('base64')
-    }
+    let endorsement: EndorsementResponseBase64["endorsement"] = {
+      endorser: null,
+      signature: null,
+    };
+    if (responseObj.endorsement !== null) {
+      endorsement = {
+        endorser: responseObj.endorsement.endorser.toString('base64'),
+        signature: responseObj.endorsement.signature.toString('base64')
+      }
+  }
     const payload = responseObj.payload.toString('base64')
     const response = {
       status: responseObj.response.status,
@@ -46,9 +52,15 @@ export const proposalResponseToBase64 = (responses: EndorsementResponse[]): Endo
 
 export const proposalResponseToBuffer = (responses: EndorsementResponseBase64[]): EndorsementResponse[] => {
   const processedResponses: EndorsementResponse[] = responses.map((responseObj) => {
-    const endorsement = {
-      endorser: Buffer.from(responseObj.endorsement.endorser, 'base64'),
-      signature: Buffer.from(responseObj.endorsement.signature, 'base64')
+    let endorsement = {
+      endorser: Buffer.alloc(0),
+      signature: Buffer.alloc(0),
+    };
+    if (responseObj.endorsement.endorser !== null && responseObj.endorsement.signature !== null) {
+      endorsement = {
+        endorser: Buffer.from(responseObj.endorsement.endorser, 'base64'),
+        signature: Buffer.from(responseObj.endorsement.signature, 'base64')
+      }
     }
     const payload = Buffer.from(responseObj.payload, 'base64')
     const response = {

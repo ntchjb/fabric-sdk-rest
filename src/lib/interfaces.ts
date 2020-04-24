@@ -63,11 +63,11 @@ export interface EndorsementResponseBase64 {
   /** Endorser information in Protobuf binary format */
 	endorsement: {
     /** Identity of the endorser in base64 format */
-    endorser: string;
+    endorser: string | null;
     /** Signature of the payload included in ProposalResponse concatenated with
      * the endorser's certificate ie, sign(ProposalResponse.payload + endorser)
      * This is encoded in base64 format */
-		signature: string;
+		signature: string | null;
 	};
 }
 
