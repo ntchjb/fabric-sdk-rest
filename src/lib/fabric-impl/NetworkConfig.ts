@@ -9,7 +9,7 @@
  This is also rewritten to use TypeScript
 */
 
-import winston from 'winston'
+import winston, { format } from 'winston'
 import { Client, ConnectOptions } from 'fabric-common'
 import fs from 'fs'
 import path from 'path'
@@ -17,7 +17,11 @@ import path from 'path'
 const logger = winston.createLogger({
   transports: [
     new winston.transports.Console({ level: 'debug' })
-  ]
+  ],
+  format: format.combine(
+    format.splat(),
+    format.simple(),
+  ),
 })
 
 interface NetworkConfigData {
