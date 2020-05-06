@@ -1,3 +1,9 @@
+/**
+ * Custom version of EventService class
+ *
+ * Copyright 2020 JAIBOON Nathachai
+ */
+
 import { EventService, Channel } from "fabric-common"
 
 class CustomEventService extends EventService {

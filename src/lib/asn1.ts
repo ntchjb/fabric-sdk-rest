@@ -1,5 +1,7 @@
 /**
- * 
+ * Partial implementation of ASN.1 DER data encoder/decoder
+ *
+ * Copyright 2020 JAIBOON Nathachai
  */
 
 

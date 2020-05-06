@@ -23,4 +23,4 @@ This is a RESTful server which is a stateless server that provides API to `creat
 
 # License
 
-Copyright 2020 [JAIBOON Nathachai](https://github.com/ntchjb)
+Copyright 2020 © [JAIBOON Nathachai](https://github.com/ntchjb)

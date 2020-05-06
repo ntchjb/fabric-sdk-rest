@@ -5,6 +5,8 @@
  * ASN.1 (X.680) is a schema used to encode/decode data and send through serial communication.
  * DER (X.690) encoding rules is a subset of BER with stricter encoding rules which eliminate alternative rules from BER
  * DER is one of the encoding that commonly used in cryptography e.g. X.509 certificate, signature
+ * 
+ * Copyright 2020 JAIBOON Nathachai
  */
 
 import { RootDefinition, ASN1Type, ASN1, twoComplementConverter, getBigIntegerFromBuffer } from "./asn1"
